@@ -47,43 +47,45 @@ function runAway(e) {
     const buttonHeight = noButton.offsetHeight;
     const isMobile = window.innerWidth <= 768;
 
-    // Fixed movement range for better control
-    const moveRange = isMobile ? 80 : 200;
+    // Get current button position
+    const currentRect = noButton.getBoundingClientRect();
     
-    // Get current position
-    const currentX = parseInt(noButton.style.left) || noButton.getBoundingClientRect().left;
-    const currentY = parseInt(noButton.style.top) || noButton.getBoundingClientRect().top;
+    // Calculate move distance based on device
+    const moveDistance = isMobile ? 100 : 200;
     
-    // Calculate new position with smaller movements
-    let newX = currentX + (Math.random() - 0.5) * moveRange;
-    let newY = currentY + (Math.random() - 0.5) * moveRange;
+    // Calculate direction away from cursor/touch
+    let newX = currentRect.left;
+    let newY = currentRect.top;
     
-    // Ensure button stays within visible area
-    const padding = isMobile ? 10 : 20;
+    if (e.type === 'mouseover' || e.type === 'mouseenter') {
+        newX += e.clientX > currentRect.left ? -moveDistance : moveDistance;
+        newY += e.clientY > currentRect.top ? -moveDistance : moveDistance;
+    } else {
+        // Random movement for touch/click
+        newX += (Math.random() - 0.5) * moveDistance * 2;
+        newY += (Math.random() - 0.5) * moveDistance * 2;
+    }
+    
+    // Keep button within viewport bounds
+    const padding = isMobile ? 20 : 50;
     newX = Math.max(padding, Math.min(windowWidth - buttonWidth - padding, newX));
     newY = Math.max(padding, Math.min(windowHeight - buttonHeight - padding, newY));
     
-    // Get Yes button safe zone
+    // Ensure we're not too close to the yes button
     const yesRect = yesButton.getBoundingClientRect();
-    const safeDistance = isMobile ? 60 : 100;
+    const minDistance = isMobile ? 80 : 120;
     
-    // Avoid Yes button area
-    if (Math.abs(newX - yesRect.left) < safeDistance && Math.abs(newY - yesRect.top) < safeDistance) {
-        newX = newX < yesRect.left ? newX - safeDistance : newX + safeDistance;
-        newY = newY < yesRect.top ? newY - safeDistance : newY + safeDistance;
+    if (Math.abs(newX - yesRect.left) < minDistance && Math.abs(newY - yesRect.top) < minDistance) {
+        newX = newX < yesRect.left ? newX - minDistance : newX + minDistance;
+        newY = newY < yesRect.top ? newY - minDistance : newY + minDistance;
     }
-    
-    // Apply position with smoother transition
+
+    // Apply new position
     noButton.style.position = 'fixed';
-    noButton.style.transition = isMobile ? 'all 0.5s ease-out' : 'all 0.3s ease-out';
+    noButton.style.transition = `all ${isMobile ? '0.5s' : '0.3s'} ease-out`;
     noButton.style.left = `${newX}px`;
     noButton.style.top = `${newY}px`;
     noButton.style.zIndex = '9999';
-    
-    // Ensure button stays visible
-    noButton.style.opacity = '1';
-    noButton.style.visibility = 'visible';
-    noButton.style.display = 'block';
 }
 
 yesBtn.addEventListener('click', () => {
@@ -103,18 +105,17 @@ noBtn.addEventListener('click', () => {
         noCount++;
         title.innerHTML = messages[noCount - 1].text;
         document.querySelector('img').src = messages[noCount - 1].image;
-    } else {
+    } else if (noCount === 3) {
         title.innerHTML = "TAPI BOONG HEHEHE";
-        if (!noBtn.classList.contains('running')) {
-            noBtn.classList.add('running');
-            runAway({ target: noBtn });
-        } else {
-            runAway({ target: noBtn });
-        }
+        noCount++;
+        noBtn.classList.add('running');
+        runAway({ target: noBtn, type: 'click' });
+    } else {
+        runAway({ target: noBtn, type: 'click' });
     }
 });
 
-// Simplify event listeners
+// Update event listeners for button movement
 noBtn.addEventListener('mouseover', (e) => {
     if (noCount >= 3) runAway(e);
 });
@@ -122,6 +123,6 @@ noBtn.addEventListener('mouseover', (e) => {
 noBtn.addEventListener('touchstart', (e) => {
     if (noCount >= 3) {
         e.preventDefault();
-        runAway(e);
+        runAway({ target: noBtn, type: 'click', clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
     }
 }, { passive: false });
