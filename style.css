@@ -103,6 +103,7 @@ img {
     visibility: visible !important;
     display: block !important;
     pointer-events: auto !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
 }
 
 .music-btn {
@@ -168,6 +169,15 @@ img {
         background-color: #f2f2f2 !important;
         color: #333 !important;
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        min-width: 140px !important;
+        min-height: 60px !important;
+        font-size: 1.3rem !important;
+        padding: 15px 30px !important;
+        border-radius: 15px !important;
+    }
+
+    .no-btn.running:active {
+        transform: scale(0.95);
     }
 
     /* Add spacing between buttons */

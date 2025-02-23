@@ -77,29 +77,73 @@ function runAway(e) {
     const buttonWidth = noButton.offsetWidth;
     const buttonHeight = noButton.offsetHeight;
 
-    // Keep button within 80% of screen bounds
-    const safeWidth = windowWidth * 0.8;
-    const safeHeight = windowHeight * 0.8;
+    // Smaller range for mobile, larger for PC
+    const isMobile = window.innerWidth <= 768;
+    const moveRange = isMobile ? 150 : 300;
     
-    // Calculate new position
-    let newX = Math.random() * (safeWidth - buttonWidth);
-    let newY = Math.random() * (safeHeight - buttonHeight);
+    // Get current position
+    const rect = noButton.getBoundingClientRect();
+    let currentX = rect.left;
+    let currentY = rect.top;
     
-    // Add minimum distances from edges
-    newX = Math.max(20, Math.min(newX, windowWidth - buttonWidth - 20));
-    newY = Math.max(20, Math.min(newY, windowHeight - buttonHeight - 20));
+    // Add random movement
+    let newX = currentX + (Math.random() - 0.5) * moveRange;
+    let newY = currentY + (Math.random() - 0.5) * moveRange;
     
-    // Apply new position
+    // Keep button in viewport with padding
+    const padding = isMobile ? 20 : 50;
+    newX = Math.max(padding, Math.min(newX, windowWidth - buttonWidth - padding));
+    newY = Math.max(padding, Math.min(newY, windowHeight - buttonHeight - padding));
+    
+    // Apply new position with smooth transition
     noButton.style.position = 'fixed';
-    noButton.style.transition = 'all 0.5s ease';
+    noButton.style.transition = `all ${isMobile ? '0.8s' : '0.3s'} ease`;
     noButton.style.left = `${newX}px`;
     noButton.style.top = `${newY}px`;
-    
-    // Ensure button stays visible
-    noButton.style.opacity = '1';
-    noButton.style.visibility = 'visible';
-    noButton.style.display = 'block';
+    noButton.style.zIndex = '9999';
 }
+
+// Update the button behavior initialization
+function initializeButtonBehavior() {
+    noBtn.removeEventListener('touchstart', handleTouch);
+    noBtn.removeEventListener('mouseover', runAway);
+    
+    noBtn.addEventListener('click', (e) => {
+        if (noCount < 3) {
+            noCount++;
+            title.innerHTML = messages[noCount - 1].text;
+            document.querySelector('img').src = messages[noCount - 1].image;
+        } else {
+            e.preventDefault();
+            title.innerHTML = "TAPI BOONG HEHEHE";
+            if (!noBtn.classList.contains('running')) {
+                noBtn.classList.add('running');
+                // Add both mouse and touch events
+                noBtn.addEventListener('mouseover', runAway);
+                noBtn.addEventListener('touchstart', runAway);
+            }
+            runAway(e);
+        }
+    });
+}
+
+// Add visibility check and repositioning
+setInterval(() => {
+    if (noCount >= 3 && noBtn.classList.contains('running')) {
+        const rect = noBtn.getBoundingClientRect();
+        const isOutOfBounds = (
+            rect.right < 0 ||
+            rect.bottom < 0 || 
+            rect.left > window.innerWidth || 
+            rect.top > window.innerHeight
+        );
+        
+        if (isOutOfBounds) {
+            // Bring button back to visible area
+            runAway({ target: noBtn });
+        }
+    }
+}, 500);
 
 // Remove previous touch event listeners and replace with this new implementation
 function initializeButtonBehavior() {
