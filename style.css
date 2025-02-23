@@ -92,13 +92,17 @@ img {
 .no-btn:hover { transform: scale(0.9); }
 
 .running { 
-    transition: all 0.3s ease-out;
+    transition: all 0.5s ease !important;
     position: fixed !important; /* Force position fixed on iOS */
     transform: translate3d(0, 0, 0); /* Enable hardware acceleration */
     -webkit-transform: translate3d(0, 0, 0);
     will-change: transform; /* Optimize animations */
     touch-action: none;
-    z-index: 1000;
+    z-index: 9999;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    pointer-events: auto !important;
 }
 
 .music-btn {
@@ -130,8 +134,9 @@ img {
     .container {
         width: 90%;
         max-width: 400px;
-        margin: 20px;
-        padding: 1rem;
+        margin: 10px;
+        padding: 15px;
+        max-height: 80vh;
     }
 
     img {
@@ -144,11 +149,12 @@ img {
     }
 
     .btn {
-        min-width: 100px; /* Ensure minimum touch target size */
-        min-height: 44px; /* iOS recommended minimum */
-        padding: 12px 24px;
-        margin: 8px;
-        touch-action: none;
+        min-width: 120px; /* Ensure minimum touch target size */
+        min-height: 50px; /* iOS recommended minimum */
+        padding: 15px 30px;
+        font-size: 1.2rem;
+        opacity: 1 !important;
+        visibility: visible !important;
     }
 
     .no-btn {
@@ -156,6 +162,12 @@ img {
         -webkit-user-select: none;
         user-select: none;
         touch-action: none;
+    }
+
+    .no-btn.running {
+        background-color: #f2f2f2 !important;
+        color: #333 !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
 
     /* Add spacing between buttons */

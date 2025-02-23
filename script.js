@@ -74,48 +74,80 @@ function runAway(e) {
     const noButton = e.target;
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
-    const buttonRect = noButton.getBoundingClientRect();
+    const buttonWidth = noButton.offsetWidth;
+    const buttonHeight = noButton.offsetHeight;
 
-    // Smaller movement range for mobile
-    const moveRange = window.innerWidth < 768 ? 100 : 200;
+    // Keep button within 80% of screen bounds
+    const safeWidth = windowWidth * 0.8;
+    const safeHeight = windowHeight * 0.8;
     
-    // Current position
-    const currentX = buttonRect.left;
-    const currentY = buttonRect.top;
+    // Calculate new position
+    let newX = Math.random() * (safeWidth - buttonWidth);
+    let newY = Math.random() * (safeHeight - buttonHeight);
     
-    // Calculate new position with limited range
-    let newX = currentX + (Math.random() - 0.5) * moveRange;
-    let newY = currentY + (Math.random() - 0.5) * moveRange;
+    // Add minimum distances from edges
+    newX = Math.max(20, Math.min(newX, windowWidth - buttonWidth - 20));
+    newY = Math.max(20, Math.min(newY, windowHeight - buttonHeight - 20));
     
-    // Ensure button stays in viewport
-    newX = Math.max(10, Math.min(newX, windowWidth - buttonRect.width - 10));
-    newY = Math.max(10, Math.min(newY, windowHeight - buttonRect.height - 10));
-    
+    // Apply new position
     noButton.style.position = 'fixed';
-    noButton.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
-    noButton.style.left = '0';
-    noButton.style.top = '0';
+    noButton.style.transition = 'all 0.5s ease';
+    noButton.style.left = `${newX}px`;
+    noButton.style.top = `${newY}px`;
+    
+    // Ensure button stays visible
+    noButton.style.opacity = '1';
+    noButton.style.visibility = 'visible';
+    noButton.style.display = 'block';
 }
 
-// Replace existing touch event listeners with these
-noBtn.addEventListener('touchstart', function(e) {
-    e.preventDefault();
-    runAway(e);
-}, { passive: false });
+// Remove previous touch event listeners and replace with this new implementation
+function initializeButtonBehavior() {
+    noBtn.removeEventListener('touchstart', handleTouch);
+    noBtn.removeEventListener('mouseover', runAway);
+    
+    noBtn.addEventListener('click', (e) => {
+        if (noCount < 3) {
+            e.preventDefault();
+            noCount++;
+            title.innerHTML = messages[noCount - 1].text;
+            document.querySelector('img').src = messages[noCount - 1].image;
+        } else {
+            e.preventDefault();
+            title.innerHTML = "TAPI BOONG HEHEHE";
+            if (!noBtn.classList.contains('running')) {
+                noBtn.classList.add('running');
+                runAway(e);
+            }
+        }
+    });
 
-noBtn.addEventListener('touchend', function(e) {
-    e.preventDefault();
-}, { passive: false });
+    // Handle touch events for mobile
+    noBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (noCount >= 3) {
+            runAway(e);
+        }
+    }, { passive: false });
+}
 
-// Add this new function for touch movement
-function handleTouch(e) {
-    if (noCount >= 3) {
-        runAway(e);
+// Initialize button behavior
+initializeButtonBehavior();
+
+// Remove previous touch event listeners
+document.removeEventListener('touchmove', function(e) {
+    e.preventDefault();
+});
+
+// Update button visibility check
+setInterval(() => {
+    if (noCount >= 3 && noBtn.classList.contains('running')) {
+        const rect = noBtn.getBoundingClientRect();
+        if (rect.right < 0 || rect.bottom < 0 || 
+            rect.left > window.innerWidth || 
+            rect.top > window.innerHeight) {
+            // Reset position if button goes outside viewport
+            runAway({ target: noBtn });
+        }
     }
-}
-
-// Add these new event listeners
-noBtn.addEventListener('touchstart', handleTouch);
-document.addEventListener('touchmove', function(e) {
-    e.preventDefault();
-}, { passive: false });
+}, 1000);
