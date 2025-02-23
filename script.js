@@ -72,14 +72,30 @@ noBtn.addEventListener('click', () => {
 
 function runAway(e) {
     const noButton = e.target;
-    const container = document.querySelector('.container');
-    const containerRect = container.getBoundingClientRect();
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
     const buttonRect = noButton.getBoundingClientRect();
 
-    const maxX = containerRect.width - buttonRect.width;
-    const maxY = containerRect.height - buttonRect.height;
+    // Calculate new position relative to viewport
+    let newX = Math.random() * (windowWidth - buttonRect.width);
+    let newY = Math.random() * (windowHeight - buttonRect.height);
 
-    noButton.style.position = 'absolute';
-    noButton.style.left = `${Math.random() * maxX}px`;
-    noButton.style.top = `${Math.random() * maxY}px`;
+    // Ensure button stays within visible area
+    newX = Math.max(0, Math.min(newX, windowWidth - buttonRect.width));
+    newY = Math.max(0, Math.min(newY, windowHeight - buttonRect.height));
+
+    // Apply new position with transform for better performance
+    noButton.style.position = 'fixed';
+    noButton.style.transform = `translate(${newX}px, ${newY}px)`;
+    noButton.style.left = '0';
+    noButton.style.top = '0';
 }
+
+// Add touch event handlers for mobile
+noBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault(); // Prevent default touch behavior
+}, { passive: false });
+
+noBtn.addEventListener('touchmove', (e) => {
+    e.preventDefault(); // Prevent scrolling when trying to touch the button
+}, { passive: false });
