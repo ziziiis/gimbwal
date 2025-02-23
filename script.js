@@ -76,26 +76,46 @@ function runAway(e) {
     const windowHeight = window.innerHeight;
     const buttonRect = noButton.getBoundingClientRect();
 
-    // Calculate new position relative to viewport
-    let newX = Math.random() * (windowWidth - buttonRect.width);
-    let newY = Math.random() * (windowHeight - buttonRect.height);
-
-    // Ensure button stays within visible area
-    newX = Math.max(0, Math.min(newX, windowWidth - buttonRect.width));
-    newY = Math.max(0, Math.min(newY, windowHeight - buttonRect.height));
-
-    // Apply new position with transform for better performance
+    // Smaller movement range for mobile
+    const moveRange = window.innerWidth < 768 ? 100 : 200;
+    
+    // Current position
+    const currentX = buttonRect.left;
+    const currentY = buttonRect.top;
+    
+    // Calculate new position with limited range
+    let newX = currentX + (Math.random() - 0.5) * moveRange;
+    let newY = currentY + (Math.random() - 0.5) * moveRange;
+    
+    // Ensure button stays in viewport
+    newX = Math.max(10, Math.min(newX, windowWidth - buttonRect.width - 10));
+    newY = Math.max(10, Math.min(newY, windowHeight - buttonRect.height - 10));
+    
     noButton.style.position = 'fixed';
-    noButton.style.transform = `translate(${newX}px, ${newY}px)`;
+    noButton.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
     noButton.style.left = '0';
     noButton.style.top = '0';
 }
 
-// Add touch event handlers for mobile
-noBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault(); // Prevent default touch behavior
+// Replace existing touch event listeners with these
+noBtn.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    runAway(e);
 }, { passive: false });
 
-noBtn.addEventListener('touchmove', (e) => {
-    e.preventDefault(); // Prevent scrolling when trying to touch the button
+noBtn.addEventListener('touchend', function(e) {
+    e.preventDefault();
+}, { passive: false });
+
+// Add this new function for touch movement
+function handleTouch(e) {
+    if (noCount >= 3) {
+        runAway(e);
+    }
+}
+
+// Add these new event listeners
+noBtn.addEventListener('touchstart', handleTouch);
+document.addEventListener('touchmove', function(e) {
+    e.preventDefault();
 }, { passive: false });

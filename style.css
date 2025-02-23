@@ -92,11 +92,13 @@ img {
 .no-btn:hover { transform: scale(0.9); }
 
 .running { 
-    transition: all 0.2s;
+    transition: all 0.3s ease-out;
     position: fixed !important; /* Force position fixed on iOS */
     transform: translate3d(0, 0, 0); /* Enable hardware acceleration */
     -webkit-transform: translate3d(0, 0, 0);
     will-change: transform; /* Optimize animations */
+    touch-action: none;
+    z-index: 1000;
 }
 
 .music-btn {
@@ -139,6 +141,27 @@ img {
 
     .title {
         font-size: 1.5rem;
+    }
+
+    .btn {
+        min-width: 100px; /* Ensure minimum touch target size */
+        min-height: 44px; /* iOS recommended minimum */
+        padding: 12px 24px;
+        margin: 8px;
+        touch-action: none;
+    }
+
+    .no-btn {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        touch-action: none;
+    }
+
+    /* Add spacing between buttons */
+    .buttons {
+        gap: 20px;
+        padding: 10px 0;
     }
 
     .btn {
