@@ -93,11 +93,7 @@ yesBtn.addEventListener('click', () => {
     document.querySelector('img').src = "https://media.tenor.com/gUiu1zyxfzYAAAAi/good-night-kiss-kiss.gif";
     noBtn.style.display = 'none';
     yesBtn.style.display = 'none';
-    if (!isMusicPlaying) {
-        bgMusic.play();
-        musicControl.classList.add('playing');
-        isMusicPlaying = true;
-    }
+    bgMusic.play();
 });
 
 noBtn.addEventListener('click', () => {
@@ -105,24 +101,30 @@ noBtn.addEventListener('click', () => {
         noCount++;
         title.innerHTML = messages[noCount - 1].text;
         document.querySelector('img').src = messages[noCount - 1].image;
-    } else if (noCount === 3) {
-        title.innerHTML = "TAPI BOONG HEHEHE";
-        noCount++;
-        noBtn.classList.add('running');
-        runAway({ target: noBtn, type: 'click' });
     } else {
-        runAway({ target: noBtn, type: 'click' });
+        title.innerHTML = "TAPI BOONG HEHEHE";
+        if (!noBtn.classList.contains('running')) {
+            noBtn.classList.add('running');
+        }
+        // Always run away on click after 3 clicks
+        runAway({ 
+            target: noBtn, 
+            type: 'click',
+            clientX: event.clientX || event.touches?.[0]?.clientX,
+            clientY: event.clientY || event.touches?.[0]?.clientY
+        });
     }
 });
 
-// Update event listeners for button movement
-noBtn.addEventListener('mouseover', (e) => {
-    if (noCount >= 3) runAway(e);
-});
-
-noBtn.addEventListener('touchstart', (e) => {
+// Make button run away on hover/touch
+const handleButtonDodge = (e) => {
     if (noCount >= 3) {
         e.preventDefault();
-        runAway({ target: noBtn, type: 'click', clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
+        e.stopPropagation();
+        runAway(e);
     }
-}, { passive: false });
+};
+
+noBtn.addEventListener('mouseover', handleButtonDodge);
+noBtn.addEventListener('touchstart', handleButtonDodge, { passive: false });
+noBtn.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
