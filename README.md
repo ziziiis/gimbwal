@@ -1,57 +1,77 @@
 # Nembak Cewe Proposal Website
 
-A cute and interactive Valentine's proposal website with running button feature and background music.
+Website buat nembak cewe dengan fitur button yang kabur dan musik otomatis.
 
-## 🛠 Customization Guide
+## 🎮 Cara Pakai
 
-### Changing Messages
-Edit the messages array in `script.js`:
+### Deploy ke Vercel
+1. Fork repository ini
+2. Buka [Vercel](https://vercel.com)
+3. Import repository yang sudah di fork
+4. Deploy
+
+### Deploy Local
+1. Clone repository ini
+2. Buka terminal, ketik:
+```bash
+npm install
+npm start
+```
+
+## 🛠 Cara Mengubah Konten
+
+### 1. Mengubah Teks dan Gambar
+Di file `script.js`, cari bagian ini:
 ```javascript
 const messages = [
     {
-        text: "Your first message",
-        image: "URL to first image"
+        text: "plss mau dong",
+        image: "URL_GAMBAR_1"
     },
     {
-        text: "Your second message",
-        image: "URL to second image"
+        text: "pls klik yg kiri",
+        image: "URL_GAMBAR_2"
     },
     {
-        text: "Your third message",
-        image: "URL to third image"
+        text: "terakhir, kalo \"no\" yauda deh",
+        image: "URL_GAMBAR_3"
     }
 ];
 ```
+Ganti teks dan URL gambar sesuai keinginan.
 
-### Changing Initial Content
-1. Open `index.html`
-2. Change the title text: `<h1 class="title">Your initial question</h1>`
-3. Change the initial image: `<img src="your-image-url" alt="cute-gif">`
+### 2. Mengubah Pertanyaan Awal
+Di file `index.html`, cari:
+```html
+<h1 class="title">Will you be my girlfriend?</h1>
+```
+Ganti teksnya sesuai keinginan.
 
-### Changing Final Message
-In `script.js`, find the `yesBtn.addEventListener` and modify:
-```javascript
-title.innerHTML = "Your final message";
-document.querySelector('img').src = "your-final-image-url";
+### 3. Mengubah Musik
+Di file `index.html`, cari bagian `<audio>`, ganti `src` dengan URL musik kamu:
+```html
+<audio id="bgMusic" loop>
+    <source src="URL_MUSIK_KAMU" type="video/mp4">
+</audio>
 ```
 
-### Changing Background Music
-1. Open `index.html`
-2. Find the `<audio>` tag
-3. Replace the `src` attribute with your music URL
+### 4. Mengubah Pesan Akhir
+Di file `script.js`, cari:
+```javascript
+yesBtn.addEventListener('click', () => {
+    title.innerHTML = "HORE!! i knew you would say vqsghvwegdsbjs";
+    document.querySelector('img').src = "URL_GAMBAR_AKHIR";
+});
+```
+Ganti teks dan URL gambar sesuai keinginan.
 
-## 🎨 Features
-- Interactive buttons
-- Running "No" button
-- Background music
-- Falling hearts animation
-- Mobile responsive
-- iOS & Android compatible
-
-## 🔧 Setup
-1. Clone the repository
-2. Deploy on Vercel or any static hosting
-3. Share with your loved one!
+## 🎨 Fitur
+- Tombol "No" yang kabur ketika di hover/klik
+- Musik otomatis main (volume 30%)
+- Animasi hati jatuh
+- Responsive di HP dan PC
+- Pesan dan gambar berubah setiap klik "No"
+- Support semua browser
 
 ## 👨‍💻 Author
 **Nerox**
@@ -62,5 +82,8 @@ document.querySelector('img').src = "your-final-image-url";
 Copyright © 2024 Nerox.
 All rights reserved.
 
-## 💝 Acknowledgments
-Made with love for Valentine's Day confessions 💕
+## 💝 Tips
+- Gunakan gambar GIF untuk animasi yang lebih menarik
+- Pastikan URL gambar dan musik valid
+- Test dulu di HP sebelum dikirim ke doi
+- Musik yang direkomendasikan: lagu romantis yang viral di TikTok
