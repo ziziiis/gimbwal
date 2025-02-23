@@ -40,52 +40,69 @@ let noCount = 0;
 
 function runAway(e) {
     const noButton = e.target;
-    const yesButton = document.querySelector('.yes-btn');
+    const container = document.querySelector('.container');
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
     const buttonWidth = noButton.offsetWidth;
     const buttonHeight = noButton.offsetHeight;
     const isMobile = window.innerWidth <= 768;
 
-    // Get current button position
-    const currentRect = noButton.getBoundingClientRect();
-    
-    // Calculate move distance based on device
-    const moveDistance = isMobile ? 100 : 200;
+    // Ensure button is above container
+    if (noButton.style.zIndex !== '9999') {
+        document.body.appendChild(noButton);
+        noButton.style.position = 'fixed';
+        noButton.style.zIndex = '9999';
+    }
+
+    // Get current position or set initial if not set
+    const currentX = parseInt(noButton.style.left) || e.clientX || windowWidth / 2;
+    const currentY = parseInt(noButton.style.top) || e.clientY || windowHeight / 2;
+
+    // Calculate smooth evasion
+    const moveRange = isMobile ? 150 : 250;
+    const mouseX = e.clientX || e.touches?.[0]?.clientX || currentX;
+    const mouseY = e.clientY || e.touches?.[0]?.clientY || currentY;
     
     // Calculate direction away from cursor/touch
-    let newX = currentRect.left;
-    let newY = currentRect.top;
+    const deltaX = currentX - mouseX;
+    const deltaY = currentY - mouseY;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     
-    if (e.type === 'mouseover' || e.type === 'mouseenter') {
-        newX += e.clientX > currentRect.left ? -moveDistance : moveDistance;
-        newY += e.clientY > currentRect.top ? -moveDistance : moveDistance;
+    // Smoother movement with normalized direction
+    let newX = currentX;
+    let newY = currentY;
+    
+    if (distance < moveRange) {
+        const scale = moveRange / (distance || 1);
+        newX = currentX + deltaX * scale;
+        newY = currentY + deltaY * scale;
     } else {
-        // Random movement for touch/click
-        newX += (Math.random() - 0.5) * moveDistance * 2;
-        newY += (Math.random() - 0.5) * moveDistance * 2;
+        // Random movement if not near cursor
+        newX = currentX + (Math.random() - 0.5) * moveRange;
+        newY = currentY + (Math.random() - 0.5) * moveRange;
     }
     
     // Keep button within viewport bounds
-    const padding = isMobile ? 20 : 50;
+    const padding = isMobile ? 20 : 40;
     newX = Math.max(padding, Math.min(windowWidth - buttonWidth - padding, newX));
     newY = Math.max(padding, Math.min(windowHeight - buttonHeight - padding, newY));
     
-    // Ensure we're not too close to the yes button
-    const yesRect = yesButton.getBoundingClientRect();
-    const minDistance = isMobile ? 80 : 120;
-    
-    if (Math.abs(newX - yesRect.left) < minDistance && Math.abs(newY - yesRect.top) < minDistance) {
-        newX = newX < yesRect.left ? newX - minDistance : newX + minDistance;
-        newY = newY < yesRect.top ? newY - minDistance : newY + minDistance;
+    // Avoid container area
+    const containerRect = container.getBoundingClientRect();
+    if (newX > containerRect.left - buttonWidth && newX < containerRect.right &&
+        newY > containerRect.top - buttonHeight && newY < containerRect.bottom) {
+        // Move to nearest edge of container
+        if (Math.abs(newX - containerRect.left) < Math.abs(newX - containerRect.right)) {
+            newX = containerRect.left - buttonWidth - padding;
+        } else {
+            newX = containerRect.right + padding;
+        }
     }
 
-    // Apply new position
-    noButton.style.position = 'fixed';
-    noButton.style.transition = `all ${isMobile ? '0.5s' : '0.3s'} ease-out`;
+    // Apply smooth movement
+    noButton.style.transition = `all ${isMobile ? '0.8s' : '0.5s'} cubic-bezier(0.34, 1.56, 0.64, 1)`;
     noButton.style.left = `${newX}px`;
     noButton.style.top = `${newY}px`;
-    noButton.style.zIndex = '9999';
 }
 
 yesBtn.addEventListener('click', () => {
