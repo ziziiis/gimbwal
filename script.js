@@ -51,43 +51,18 @@ function runAway(e) {
     const windowHeight = window.innerHeight;
     const buttonWidth = noButton.offsetWidth;
     const buttonHeight = noButton.offsetHeight;
-    const isMobile = window.innerWidth <= 768;
 
-    // Ensure button stays within 80% of the screen
-    const safeArea = {
-        minX: 20,
-        maxX: windowWidth - buttonWidth - 20,
-        minY: 20,
-        maxY: windowHeight - buttonHeight - 20
-    };
-
-    let newX, newY;
-
-    // Different movement patterns for mobile and desktop
-    if (isMobile) {
-        // Smoother, more controlled movement for mobile
-        const moveDistance = 100; // Smaller distance for mobile
-        newX = Math.max(safeArea.minX, Math.min(safeArea.maxX,
-            buttonWidth + (Math.random() * (windowWidth - buttonWidth * 2))));
-        newY = Math.max(safeArea.minY, Math.min(safeArea.maxY,
-            buttonHeight + (Math.random() * (windowHeight - buttonHeight * 2))));
-    } else {
-        // Faster, more random movement for desktop
-        newX = Math.max(safeArea.minX, Math.min(safeArea.maxX,
-            Math.random() * (windowWidth - buttonWidth)));
-        newY = Math.max(safeArea.minY, Math.min(safeArea.maxY,
-            Math.random() * (windowHeight - buttonHeight)));
-    }
+    let newX = Math.random() * (windowWidth - buttonWidth);
+    let newY = Math.random() * (windowHeight - buttonHeight);
 
     noButton.style.position = 'fixed';
-    noButton.style.transition = isMobile ? 'all 0.8s ease' : 'all 0.3s ease';
+    noButton.style.transition = 'all 0.3s ease';
     noButton.style.left = `${newX}px`;
     noButton.style.top = `${newY}px`;
-    noButton.style.zIndex = '9999';
 }
 
 yesBtn.addEventListener('click', () => {
-    title.innerHTML = "HORE!! i knew you would say vqsghvwegdsbjs";
+    title.innerHTML = "HORE!! i knew you would say yes!";
     document.querySelector('img').src = "https://media.tenor.com/gUiu1zyxfzYAAAAi/good-night-kiss-kiss.gif";
     noBtn.style.display = 'none';
     yesBtn.style.display = 'none';
@@ -112,26 +87,6 @@ noBtn.addEventListener('click', () => {
     }
 });
 
-// Handle both mouse and touch events
 noBtn.addEventListener('mouseover', (e) => {
     if (noCount >= 3) runAway(e);
 });
-
-noBtn.addEventListener('touchstart', (e) => {
-    if (noCount >= 3) {
-        e.preventDefault();
-        runAway(e);
-    }
-}, { passive: false });
-
-// Keep button in view
-setInterval(() => {
-    if (noCount >= 3 && noBtn.classList.contains('running')) {
-        const rect = noBtn.getBoundingClientRect();
-        if (rect.right < 0 || rect.bottom < 0 || 
-            rect.left > window.innerWidth || 
-            rect.top > window.innerHeight) {
-            runAway({ target: noBtn });
-        }
-    }
-}, 100);
