@@ -47,82 +47,77 @@ function runAway(e) {
     const buttonHeight = noButton.offsetHeight;
     const isMobile = window.innerWidth <= 768;
 
-    // Get current position
-    const rect = noButton.getBoundingClientRect();
-    const currentX = rect.left;
-    const currentY = rect.top;
-    
-    // Calculate cursor/touch position
-    const pointer = {
-        x: e.clientX || e.touches?.[0]?.clientX || currentX,
-        y: e.clientY || e.touches?.[0]?.clientY || currentY
-    };
+    // Ensure button is in document body, not in container
+    if (noButton.parentElement !== document.body) {
+        document.body.appendChild(noButton);
+    }
 
-    // Calculate distance from pointer to button
-    const deltaX = currentX - pointer.x;
-    const deltaY = currentY - pointer.y;
-    const angle = Math.atan2(deltaY, deltaX);
+    // Get container boundaries
+    const containerRect = container.getBoundingClientRect();
+    const safeDistance = isMobile ? 80 : 120; // Minimum distance from container
 
-    // Longer movement range but ensure it stays in view
-    const moveDistance = isMobile ? 
-        Math.min(windowWidth, windowHeight) * 0.4 : // 40% of screen size for mobile
-        Math.min(windowWidth, windowHeight) * 0.6;  // 60% of screen size for desktop
+    // Get current position or use initial position
+    const currentX = parseInt(noButton.style.left) || containerRect.right + safeDistance;
+    const currentY = parseInt(noButton.style.top) || containerRect.top;
 
-    // Calculate new position with angle-based movement
-    let newX = currentX + Math.cos(angle) * moveDistance;
-    let newY = currentY + Math.sin(angle) * moveDistance;
+    // Calculate new position
+    let newX, newY;
 
-    // Add some randomness to make it less predictable
-    newX += (Math.random() - 0.5) * 50;
-    newY += (Math.random() - 0.5) * 50;
+    // If button is near container, move it far away
+    if (isNearContainer(currentX, currentY, containerRect, safeDistance)) {
+        const farPosition = getFarPosition(containerRect, windowWidth, windowHeight, buttonWidth, buttonHeight, safeDistance);
+        newX = farPosition.x;
+        newY = farPosition.y;
+    } else {
+        // Normal evasion movement
+        newX = currentX + (Math.random() - 0.5) * (isMobile ? 150 : 300);
+        newY = currentY + (Math.random() - 0.5) * (isMobile ? 150 : 300);
+    }
 
-    // Keep button within viewport with padding
+    // Keep in viewport bounds
     const padding = isMobile ? 20 : 40;
     newX = Math.max(padding, Math.min(windowWidth - buttonWidth - padding, newX));
     newY = Math.max(padding, Math.min(windowHeight - buttonHeight - padding, newY));
 
-    // Avoid container area
-    const containerRect = container.getBoundingClientRect();
-    const containerAvoidance = isMobile ? 60 : 100;
-    
-    if (newX > containerRect.left - containerAvoidance && 
-        newX < containerRect.right + containerAvoidance &&
-        newY > containerRect.top - containerAvoidance && 
-        newY < containerRect.bottom + containerAvoidance) {
-        // Move to the furthest corner from current position
-        const corners = [
-            { x: padding, y: padding }, // top-left
-            { x: padding, y: windowHeight - buttonHeight - padding }, // bottom-left
-            { x: windowWidth - buttonWidth - padding, y: padding }, // top-right
-            { x: windowWidth - buttonWidth - padding, y: windowHeight - buttonHeight - padding } // bottom-right
-        ];
-
-        // Find the furthest corner from both container and current position
-        let maxDistance = 0;
-        corners.forEach(corner => {
-            const distanceFromContainer = Math.hypot(
-                corner.x - containerRect.left,
-                corner.y - containerRect.top
-            );
-            const distanceFromCurrent = Math.hypot(
-                corner.x - currentX,
-                corner.y - currentY
-            );
-            const totalDistance = distanceFromContainer + distanceFromCurrent;
-            if (totalDistance > maxDistance) {
-                maxDistance = totalDistance;
-                newX = corner.x;
-                newY = corner.y;
-            }
-        });
-    }
-
-    // Move the button with smooth animation
+    // Apply position with smooth animation
     noButton.style.position = 'fixed';
     noButton.style.transition = `all ${isMobile ? '0.8s' : '0.6s'} cubic-bezier(0.34, 1.56, 0.64, 1)`;
     noButton.style.left = `${newX}px`;
     noButton.style.top = `${newY}px`;
     noButton.style.zIndex = '9999';
+}
+
+// Add these helper functions
+function isNearContainer(x, y, containerRect, safeDistance) {
+    return x >= containerRect.left - safeDistance &&
+           x <= containerRect.right + safeDistance &&
+           y >= containerRect.top - safeDistance &&
+           y <= containerRect.bottom + safeDistance;
+}
+
+function getFarPosition(containerRect, windowWidth, windowHeight, buttonWidth, buttonHeight, safeDistance) {
+    // Choose a random side away from container
+    const positions = [
+        { // Left side
+            x: Math.max(20, containerRect.left - buttonWidth - safeDistance),
+            y: Math.random() * (windowHeight - buttonHeight - 40) + 20
+        },
+        { // Right side
+            x: Math.min(windowWidth - buttonWidth - 20, containerRect.right + safeDistance),
+            y: Math.random() * (windowHeight - buttonHeight - 40) + 20
+        },
+        { // Top side
+            x: Math.random() * (windowWidth - buttonWidth - 40) + 20,
+            y: Math.max(20, containerRect.top - buttonHeight - safeDistance)
+        },
+        { // Bottom side
+            x: Math.random() * (windowWidth - buttonWidth - 40) + 20,
+            y: Math.min(windowHeight - buttonHeight - 20, containerRect.bottom + safeDistance)
+        }
+    ];
+
+    // Return random position from available positions
+    return positions[Math.floor(Math.random() * positions.length)];
 }
 
 yesBtn.addEventListener('click', () => {
